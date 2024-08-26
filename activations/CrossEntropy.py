@@ -1,6 +1,5 @@
 import cupy as cp
 import numpy as np
-import math
 
 
 # axis=0 : применить вычисление «по столбцам»

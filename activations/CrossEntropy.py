@@ -6,13 +6,14 @@ import numpy as np
 # axis=1 : применить вычисление «построчно»
 # CrossEntropy for mini-batches gradient descent
 class CrossEntropy:
-    def __init__(self, logits, right_class, realization):
+    def __init__(self, logits, right_classes: list, realization):
         # logits shape must be n x numOfBatches
         self.probabilities = []
         self.__softmax__(logits, realization)
         self.derivative = self.probabilities
         # Need to review
-        self.derivative[right_class] -= 1
+        for line in range(len(logits)):
+            logits[line][right_classes[line]] -= 1
 
     def getDerivative(self):
         return self.derivative

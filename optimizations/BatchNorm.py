@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray as nparray
+from readers.ParamsReader import ParamsReader
 
 
 class BatchNormPerceptron:
@@ -7,14 +8,23 @@ class BatchNormPerceptron:
     dispersion = None
     gamma = None
     beta = None
-    alpha = 0.9
+    alpha = 0.99
 
     @classmethod
-    def initialize(cls, biases, realization):
-        ones = [realization.ones_like(vector) for vector in biases]
-        zeros = [realization.zeros_like(vector) for vector in biases]
-        cls.average, cls.beta = zeros
-        cls.dispersion, cls.gamma = ones
+    def installFromFile(cls, batchnorm_params_file, batchnorm_properties_file, realization):
+        # properties[0] - average
+        # properties[1] - dispersion
+        params = ParamsReader.readParams(batchnorm_params_file)
+        properties = ParamsReader.readProperties(batchnorm_properties_file)
+        for i in range(len(properties[0])):
+            params[0][i] = realization.array(params[0][i])
+            params[1][i] = realization.array(params[1][i])
+            properties[0][i] = realization.array(properties[0][i])
+            properties[1][i] = realization.array(properties[1][i])
+        cls.average = properties[0]
+        cls.dispersion = properties[1]
+        cls.gamma = params[0]
+        cls.beta = params[1]
 
     @classmethod
     def getDispersion(cls):
@@ -25,9 +35,9 @@ class BatchNormPerceptron:
         return cls.average
 
     @classmethod
-    def updateDispersion(cls, dispersion):
-        cls.dispersion = cls.alpha * cls.dispersion + (1 - cls.alpha) * dispersion
+    def updateDispersion(cls, dispersion, layer):
+        cls.dispersion[layer] = cls.alpha * cls.dispersion[layer] + (1 - cls.alpha) * dispersion
 
     @classmethod
-    def updateAverage(cls, average):
-        cls.average = cls.alpha * cls.average + (1 - cls.alpha) * average
+    def updateAverage(cls, average, layer):
+        cls.average[layer] = cls.alpha * cls.average[layer] + (1 - cls.alpha) * average
